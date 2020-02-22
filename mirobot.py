@@ -35,11 +35,15 @@ class Mirobot:
         return self.serial_device.is_open
 
     # connect to the mirobot
-    def connect(self, portname, listen_callback=None):
+    def connect(self, portname, receive_callback=None):
         self.serial_device.portname = portname
         self.serial_device.baudrate = 115200
         self.serial_device.stopbits = 1
         self.serial_device.listen_callback = self._receive_msg
+
+        if receive_callback is not None:
+            self.receive_callback = receive_callback
+            
         self.serial_device.open()
 
     # set the receive callback
