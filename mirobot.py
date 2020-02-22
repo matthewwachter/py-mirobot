@@ -3,13 +3,10 @@ from threading import Thread
 from serial_device import SerialDevice
 
 class Mirobot:
-	"""
-	Mirobot description
-	"""
-	def __init__(self, portname, receive_callback):
+	def __init__(self, portname, receive_callback=None):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-		self.serial_device = SerialDevice()
+		self.serial_device = SerialDevice(listen_callback=receive_callback)
 
 	### COMMUNICATION
 
@@ -23,10 +20,13 @@ class Mirobot:
 		self.serial_device.listen_callback = listen_callback
 		self.serial_device.open()
 
+	def set_receive_callback(self, receive_callback):
+		self.serial_device.set_listen_callback(receive_callback)
+
 	def close_connection():
 		self.serial_device.close()
 
-	def _send_msg(self, msg):
+	def send_msg(self, msg):
 		if self.is_connected():
 			self.serial_device.send(msg,  terminator='\r\n')
 
