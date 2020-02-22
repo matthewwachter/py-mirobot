@@ -45,7 +45,7 @@ m.disconnect()
 - **set_receive_callback(receive_callback)**
 	- **receive_callback (method)** - A callback method that takes a message arg (e.g. recieve_msg(message)).
 
-- **disconnect** - Closes the serial connection.
+- **disconnect()** - Closes the serial connection.
 
 ## Command Methods
 
