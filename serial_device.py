@@ -75,13 +75,11 @@ class SerialDevice:
                 print("Close error closing COM port: ", sys.exc_info()[0])
 
     # send a message to the serial port
-    def send(self,message):
+    def send(self, message, terminator='\r\n'):
         if self.is_open():
             try:
-                # Ensure that the end of the message has both \r and \n, not just one or the other
-                newmessage = message.strip()
-                newmessage += '\r\n'
-                self.serialport.write(newmessage.encode('utf-8'))
+                message += terminator
+                self.serialport.write(message.encode('utf-8'))
             except:
                 print("Error sending message: ", sys.exc_info()[0] )
             else:
