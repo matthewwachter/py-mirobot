@@ -24,7 +24,7 @@ class SerialDevice:
     # check if the serial port is open
     @property
     def is_open(self):
-        self._is_open = self.serialport.is_open()
+        self._is_open = self.serialport.is_open
         return self._is_open
 
     # sets the listen callback
@@ -40,17 +40,17 @@ class SerialDevice:
     # starts the listen thread
     def start_listen_thread(self):
         if self.listen_callback is not None:
-            self.listen_thread = Thread(target=self.listen_to_device, args=(self.listen_callback)).start()
+            self.listen_thread = Thread(target=self.listen_to_device, args=(self.listen_callback,)).start()
+
 
     # listen to the serial port and pass the message to the callback
     def listen_to_device(self, listen_callback):
-        while True:
+        while self._is_open:
             try:
-                if self._is_open:
-                    msg = self.serialport.readline()
-                    if msg != "":
-                        if listen_callback is not None:
-                            listen_callback(msg)
+                msg = self.serialport.readline()
+                if msg != "":
+                    if listen_callback is not None:
+                        listen_callback(msg)
             except:
                 print("Error reading COM port: ", sys.exc_info()[0])
 
@@ -72,8 +72,8 @@ class SerialDevice:
     def close(self):
         if self._is_open:
             try:
-                self.serialport.close()
                 self._is_open = False
+                self.serialport.close()
             except:
                 print("Close error closing COM port: ", sys.exc_info()[0])
 
