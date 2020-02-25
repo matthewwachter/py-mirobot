@@ -2,6 +2,7 @@ import serial
 import sys
 from threading import Thread
 
+
 class SerialDevice:
     def __init__(self, portname='', baudrate=0, stopbits=1, listen_callback=None):
         self.portname = portname
@@ -18,7 +19,8 @@ class SerialDevice:
         try:
             if self._is_open:
                 self.serialport.close()
-        except:
+        except Exception as e:
+            print(e)
             print("Destructor error closing COM port: ", sys.exc_info()[0] )
 
     # check if the serial port is open
@@ -42,7 +44,6 @@ class SerialDevice:
         if self.listen_callback is not None:
             self.listen_thread = Thread(target=self.listen_to_device, args=(self.listen_callback,)).start()
 
-
     # listen to the serial port and pass the message to the callback
     def listen_to_device(self, listen_callback):
         while self._is_open:
@@ -51,7 +52,8 @@ class SerialDevice:
                 if msg != "":
                     if listen_callback is not None:
                         listen_callback(msg)
-            except:
+            except Exception as e:
+                print(e)
                 print("Error reading COM port: ", sys.exc_info()[0])
 
     # open the serial port
@@ -65,7 +67,8 @@ class SerialDevice:
                 self.serialport.open()
                 self._is_open = True
                 self.start_listen_thread()
-            except:
+            except Exception as e:
+                print(e)
                 print("Error opening COM port: ", sys.exc_info()[0])
 
     # close the serial port
@@ -74,7 +77,8 @@ class SerialDevice:
             try:
                 self._is_open = False
                 self.serialport.close()
-            except:
+            except Exception as e:
+                print(e)
                 print("Close error closing COM port: ", sys.exc_info()[0])
 
     # send a message to the serial port
@@ -83,8 +87,9 @@ class SerialDevice:
             try:
                 message += terminator
                 self.serialport.write(message.encode('utf-8'))
-            except:
-                print("Error sending message: ", sys.exc_info()[0] )
+            except Exception as e:
+                print(e)
+                print("Error sending message: ", sys.exc_info()[0])
             else:
                 return True
         else:
