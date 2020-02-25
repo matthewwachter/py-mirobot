@@ -1,4 +1,5 @@
 from threading import Thread
+import sys
 
 from serial_device import SerialDevice
 
@@ -10,7 +11,7 @@ class Mirobot:
         self.receive_callback = receive_callback
         self.debug = debug
 
-    ### COMMUNICATION ###
+    #COMMUNICATION #
 
     # send a message
     def send_msg(self, msg):
@@ -27,7 +28,8 @@ class Mirobot:
         if self.receive_callback is not None:
             try:
                 self.receive_callback(msg)
-            except:
+            except Exception as e:
+                print(e)
                 print('Receive callback error: ', sys.exc_info()[0])
 
     # check if we are connected
@@ -43,7 +45,7 @@ class Mirobot:
 
         if receive_callback is not None:
             self.receive_callback = receive_callback
-            
+
         self.serial_device.open()
 
     # set the receive callback
@@ -54,8 +56,7 @@ class Mirobot:
     def disconnect(self):
         self.serial_device.close()
 
-
-    ### COMMANDS ###
+    # COMMANDS #
 
     # home each axis individually
     def home_individual(self):
