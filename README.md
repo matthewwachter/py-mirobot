@@ -70,7 +70,7 @@ m.disconnect()
 
 - **unlock_shaft()** - Unlock the shaft enabling movement.
 
-- **GoToZero()** - Send each axis to its 0 position.
+- **go_to_zero()** - Send each axis to its 0 position.
 
 - **go_to_axis(a1, a2, a3, a4, a5, a6, speed)** - Send each axis to a specific position.
 	- **a1 (float)** - Angle of axis 1.
