@@ -1,5 +1,6 @@
 from threading import Thread
 import sys
+from time import sleep
 
 from .serial_device import SerialDevice
 
@@ -183,3 +184,4 @@ class Mirobot:
     def set_gripper(self, pwm):
         msg = 'M4E' + str(pwm)
         self.send_msg(msg)
+        #sleep(0.333)  # allow gripper to open

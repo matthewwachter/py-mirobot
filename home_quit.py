@@ -30,7 +30,7 @@ i = 0
 sleep(2)
 m.home_simultaneous()
 
-wait('homing')
+wait('homing  ... type <Enter><ctl>-C to completely exit.')
 
 quit()
  
