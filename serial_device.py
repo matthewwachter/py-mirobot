@@ -31,7 +31,7 @@ class SerialDevice:
 
     # sets the listen callback
     def set_listen_callback(self, listen_callback):
-        if self.listen_thread is not None and listen_callback is not None:
+        if self.listen_thread is not None:
             self.listen_thread.stop()
 
         self.listen_callback = listen_callback
@@ -39,13 +39,6 @@ class SerialDevice:
         if self._is_open:
             self.start_listen_thread()
 
-    # allow a controler (e.g.) to store the current cb and restore it later
-    def get_listen_callback(self):
-        if self.listen_thread is not None:
-            return self.listen_callback
-        else:
-            return None
-        
     # starts the listen thread
     def start_listen_thread(self):
         if self.listen_callback is not None:
