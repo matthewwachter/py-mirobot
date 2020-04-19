@@ -10,7 +10,8 @@ aty = 0.0
 atz = 181.0
 ata = 0.0
 atb = 0.0
-atc = 0.0 
+atc = 0.0
+atgr = -32.0
 
 global ok_count
 ok_count = 0
@@ -26,19 +27,14 @@ class pose():
         self.a = ata
         self.b = atb
         self.c = atc
-    def set_position(self,X):
+    def set_position(X):
         self.x = X[0]
         self.y = X[1]
         self.z = X[2]
-    def set_rotation_XYZ(self,R):
+    def set_rotation_XYZ(R):
         self.a = R[0]
         self.b = R[1]
         self.c = R[2]
-    def copy(self):
-        x = pose()
-        x.set_position([self.x,self.y,self.z])
-        x.set_rotation_XYZ([self.a,self.b,self.c])
-        return x
         
 class MR_Controller(): 
     '''
@@ -79,7 +75,7 @@ class MR_Controller():
     
         sleep(0.25) # allow mvt to start
         while runstate == 1:
-            #print('m',end='',flush=True)
+            print('m',end='',flush=True)
             sleep(0.25)
             self.m.get_status() # cause robot to report status
             
@@ -105,13 +101,13 @@ class MR_Controller():
         if 'Soft limit' in message:
             self.error(message)
             
-        #print(symbol,end='',flush=True)   
+        print(symbol,end='',flush=True)   
             
     def gr_open(self):
-        self.m.set_gripper(40) # magic pwm values from pdf
+        self.m.set_gripper(65)
         
     def gr_close(self):
-        self.m.set_gripper(65) # magic pwm values from pdf
+        self.m.set_gripper(-32)
         
     def set_speed(self,sp): 
         if sp < 0 or sp > 2500:
@@ -125,11 +121,24 @@ class MR_Controller():
         print('ctl-C to exit')
         quit()
         
-#####################################################################
+
+
+########################3
+
+def msg_cb(message):
+    pass
+    #print('CB: ', message)
+
+    #Interesting = False
+    #if '<Idle,' in message:
+        #Interesting = True
+    #if Interesting:
+        ##pass
+        #print('CB: ', message)
 
 def wait(msg):
     print(' waiting for ',msg,'... ', flush=True)
-    x = input('<Enter> to continue...ctl-C to quit')
+    x = input('<Enter> to continue...')
     #sleep(15)
     
 ##############################################################################    Test
@@ -153,11 +162,11 @@ if __name__=='__main__':
         m.unlock_shaft()
 
 
-    wait('user to start the controller')
+    wait('about to start controller')
 
 
-    ctl = MR_Controller(m)
-    #m.set_receive_callback(ctl.ctl_cb2)
+    ctl = MR_Controller()
+    m.set_receive_callback(ctl.ctl_cb2)
 
     g0 = pose()
     
@@ -180,19 +189,17 @@ if __name__=='__main__':
     ctl.set_speed(defspeed) 
     d = 4
     
-    wait('user to start the movements')
+    wait('starting to move')
     
     for i in range(4):        
-        ctl.move('ptp',g0)
+        ctl.move(m,'ptp',g0)
         print('completed g0 move')
-        ctl.move( 'ptp',g1)
+        ctl.move(m, 'ptp',g1)
         print('completed g1 move')
-        ctl.move( 'ptp',g2)
+        ctl.move(m, 'ptp',g2)
         print('completed g2 move')
-        ctl.move( 'ptp',g3)
+        ctl.move(m, 'ptp',g3)
         print('completed g3 move')
-        ctl.move('ptp',g0)
-        print('returned to home')
         print('\nCompleted sequence '+str(i)+'\n')
 
         
