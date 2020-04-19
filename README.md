@@ -167,8 +167,8 @@ A useful function is
 
 ## Utilities
 
-- **home_quit.py**   Does those things (but because of the threading a ```<ctl>-C``` is still required from the user).
+- ** home_quit.py  **   Does those things (but because of the threading a ```<ctl>-C``` is still required from the user).
 
-- **gripper_test.py** Does some tests to verify gripper function. 
+- ** gripper_test.py ** Does some tests to verify gripper function. 
 
 
