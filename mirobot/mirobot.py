@@ -2,7 +2,9 @@ from pprint import pprint
 import re
 import sys
 
-from serial_device import SerialDevice
+from .serial_device import SerialDevice
+from .mirobot_status import MirobotStatus
+from .exceptions import MirobotError, MirobotAlarm, MirobotReset, MirobotAmbiguousPort, MirobotStatusError, MirobotResetFileError, MirobotVariableCommandError
 
 
 class Mirobot:
@@ -16,29 +18,7 @@ class Mirobot:
 
         # status
 
-        self.status = {
-            'state': None,
-            'angle': {
-                'a1': 0.0,
-                'a2': 0.0,
-                'a3': 0.0,
-                'a4': 0.0,
-                'a5': 0.0,
-                'a6': 0.0,
-                'rail': 0.0,
-            },
-            'cartesian': {
-                'tx': 0.0,
-                'ty': 0.0,
-                'tz': 0.0,
-                'rx': 0.0,
-                'ry': 0.0,
-                'rz': 0.0,
-            },
-            'pump_pwm': 0,
-            'valve_pwm': 0,
-            'motion_mode': 0,
-        }
+        self.status = MirobotStatus()
 
     # COMMUNICATION #
 
@@ -65,58 +45,70 @@ class Mirobot:
                 print('Receive callback error: ', sys.exc_info()[0])
 
         if msg.startswith('<'):
-            self._recv_status(msg)
+            self.update_status(msg)
 
-    def _recv_status(self, msg):
-        pars = self.ownerComp.par
+    def update_status(self, msg):
+        """ Update the status of the Mirobot. """
+        self.status = self._parse_status(msg)
 
-        msg = msg.strip('<').strip('>')
+    def _parse_status(self, msg):
+        """
+        Parse the status strin
+        g of the Mirobot and store the various values as class variables.
 
-        state = msg.split(',')[0]
-        if state is not None:
-            pars.Status = state
+        Parameters
+        ----------
+        msg : str
+            Status string that is obtained from a '?' instruction or `Mirobot.get_status` call.
 
-        msg = ','.join(msg.split(',')[1:])
+        Returns
+        -------
+        return_status : MirobotStatus
+            A new `mirobot.mirobot_status.MirobotStatus` object containing the new values obtained from `msg`.
+        """
 
-        angle = re.match(r'Angle\(ABCDXYZ\):(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),', msg)
+        return_status = MirobotStatus()
 
-        if angle is not None:
-            a4, a5, a6, rail, a1, a2, a3 = angle.groups()
+        state_regex = r'<([^,]*),Angle\(ABCDXYZ\):([-\.\d,]*),Cartesian coordinate\(XYZ RxRyRz\):([-.\d,]*),Pump PWM:(\d+),Valve PWM:(\d+),Motion_MODE:(\d)>'
 
-            self.status['angle']['a1'] = float(a1)
-            self.status['angle']['a2'] = float(a2)
-            self.status['angle']['a3'] = float(a3)
-            self.status['angle']['a4'] = float(a4)
-            self.status['angle']['a5'] = float(a5)
-            self.status['angle']['a6'] = float(a6)
+        regex_match = re.fullmatch(state_regex, msg)
 
-        cart = re.match(r'.*Cartesian\scoordinate\(XYZ\sRxRyRz\):(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),(-*\d*.\d*),', msg)
-        if cart is not None:
-            tx, ty, tz, rx, ry, rz = cart.groups()
-            self.status['cartesian']['tx'] = float(tx)
-            self.status['cartesian']['ty'] = float(ty)
-            self.status['cartesian']['tz'] = float(tz)
-            self.status['cartesian']['rx'] = float(rx)
-            self.status['cartesian']['ry'] = float(ry)
-            self.status['cartesian']['rz'] = float(rz)
+        if regex_match:
+            try:
+                state, angles, cartesians, pump_pwm, valve_pwm, motion_mode = regex_match.groups()
+                self.status.state = state
 
-        pump_pwm = re.match(r'.*Pump\sPWM:(\d+)', msg)
-        if pump_pwm is not None:
-            self.status['pump_pwm'] = int(pump_pwm.groups(0)[0])
+                a, b, c, d, x, y, z = map(float, angles.split(','))
 
-        valve_pwm = re.match(r'.*Valve\sPWM:(\d+)', msg)
-        if valve_pwm is not None:
-            self.status['valve_pwm'] = int(valve_pwm.groups(0)[0])
+                return_status.angle.a = a
+                return_status.angle.b = b
+                return_status.angle.c = c
+                return_status.angle.d = d
+                return_status.angle.x = x
+                return_status.angle.y = y
+                return_status.angle.z = z
 
-        motion_mode = re.match(r'.*Motion_MODE:(\d+)', msg)
-        if motion_mode is not None:
-            self.status['motion_mode'] = int(motion_mode.groups(0)[0])
+                x, y, z, a, b, c = map(float, cartesians.split(','))
+                return_status.cartesian.x = x
+                return_status.cartesian.y = y
+                return_status.cartesian.z = z
+                return_status.cartesian.a = a
+                return_status.cartesian.b = b
+                return_status.cartesian.c = c
 
-        if self.get_status_callback is not None:
-            self.get_status_callback(self.status)
+                return_status.pump_pwm = int(pump_pwm)
 
-        if self.debug:
-            pprint(self.status)
+                return_status.valve_pwm = int(valve_pwm)
+
+                return_status.motion_mode = bool(motion_mode)
+
+            except Exception as exception:
+                raise Exception([MirobotStatusError(f'Could not parse status message "{msg}"'),
+                                 exception])
+            else:
+                return return_status
+        else:
+            raise MirobotStatusError(f'Could not parse status message "{msg}"')
 
     # check if we are connected
     def is_connected(self):
