@@ -8,6 +8,18 @@ License: MIT
 
 [VT Pro Design](https://www.vtprodesign.com)
 
+## IMPORTANT!!!
+
+There is a fork of this module, created by Sourabh Cheedella, that I recommend over using this particular implementation. It is much better featured and supports blocking calls which is a more typical form of communication with robots. (e.g the robot completes it's move before accepting another command)
+
+**Please see mirobot-py here:** [github.com/rirze/mirobot-py](https://github.com/rirze/mirobot-py)
+
+For the time being, I will leave this module as a starting place for people looking to develop their own Mirobot modules as well as to provide an example of how one might communicate asynchronously with a serial device.
+
+Additionally there is the dev branch in this repo (implemented by Blake Hannaford) which supports blocking calls but still supports threaded communication.
+
+Also worth mentioning is the official Mirobot python module which supports a limited set of linear moves and the ability to make the robot "beep". This can be found here: [github.com/mirobot/mirobot-py](https://github.com/mirobot/mirobot-py)
+
 ## Description
 
 py-mirobot is a python module that can be used to control the [WLkata Mirobot](http://www.wlkata.com/site/index.html)
