@@ -18,8 +18,7 @@ For the time being, I will leave this module as a starting place for people look
 
 Additionally there is the dev branch in this repo (implemented by Blake Hannaford) which supports blocking calls but still supports threaded communication.
 
-Also worth mentioning is the official Mirobot python module which supports a limited set of linear moves and the ability to make the robot "beep". This can be found here: [github.com/mirobot/mirobot-py](https://github.com/mirobot/mirobot-py)
-
+Also worth mentioning are the Firmware and ROS repos supplied by WLkata [WLkata Github](https://github.com/wlkata)
 ## Description
 
 py-mirobot is a python module that can be used to control the [WLkata Mirobot](http://www.wlkata.com/site/index.html)
